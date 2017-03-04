@@ -9,7 +9,12 @@ ENV DEBIAN_FRONTEND noninteractive
 # install linux deps
 RUN apt-get update && apt-get install -y \
     python-pip python-dev uwsgi-plugin-python \
-    nginx supervisor curl
+    nginx supervisor curl git
+
+# ----------------------
+# DB DRIVERS (OPTIONAL)
+# needed to install psycopg2 succesfully
+RUN apt-get install -y libpq-dev
 
 # ------------------------
 # INSTALL SERVER STACK
@@ -46,16 +51,15 @@ COPY app/requirements.txt /var/www/app/requirements.txt
 RUN /bin/bash -c ". activate python3_4 && pip install uwsgi"
 RUN /bin/bash -c ". activate python3_4 && pip install -r /var/www/app/requirements.txt"
 
-
 # ---------------------------
 # RUN APP
 # Nginx, uwsgi, supervisor
 # ---------------------------
 # set up application after all the heavy installs so we don't rebuild image
 # every time we change code
-COPY app /var/www/app
 RUN chown -R www-data:www-data /var/www/app
 RUN chown -R www-data:www-data /var/log
+COPY app /var/www/app # this might need to be moved up 2 lines
 
 
 # starts supervisor given the apps in the config file
