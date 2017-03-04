@@ -11,13 +11,19 @@ RUN apt-get update && apt-get install -y \
 
 COPY nginx/flask.conf /etc/nginx/sites-available/
 COPY supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY app /var/www/app
 
 RUN mkdir -p /var/log/nginx/app /var/log/uwsgi/app /var/log/supervisor
 RUN rm /etc/nginx/sites-enabled/default
 RUN ln -s /etc/nginx/sites-available/flask.conf /etc/nginx/sites-enabled/flask.conf
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+
+# install python deps
+COPY app/requirements.txt /var/www/app/requirements.txt
 RUN pip install -r /var/www/app/requirements.txt
+
+# set up application after all the heavy installs so we don't rebuild image
+# every time we change code
+COPY app /var/www/app
 RUN chown -R www-data:www-data /var/www/app
 RUN chown -R www-data:www-data /var/log
 
