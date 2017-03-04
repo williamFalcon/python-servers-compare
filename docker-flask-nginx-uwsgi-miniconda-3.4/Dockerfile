@@ -29,10 +29,10 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 # ------------------------
 # Install miniconda to /miniconda
 ENV MINICONDA_VERSION 3-4.2.12
-RUN echo "export PATH=/opt/conda/bin:$PATH" > /etc/profile.d/conda.sh \
- && curl -fSL https://repo.continuum.io/miniconda/Miniconda${MINICONDA_VERSION}-Linux-x86_64.sh -o ~/miniconda.sh \
- && /bin/bash ~/miniconda.sh -b -p /opt/conda \
- && rm ~/miniconda.sh
+RUN echo "export PATH=/opt/conda/bin:$PATH" > /etc/profile.d/conda.sh
+RUN curl -fSL https://repo.continuum.io/miniconda/Miniconda${MINICONDA_VERSION}-Linux-x86_64.sh -o ~/miniconda.sh
+RUN /bin/bash ~/miniconda.sh -b -p /opt/conda
+RUN rm ~/miniconda.sh
 
 ENV PATH /opt/conda/bin:$PATH
 RUN conda create --name python3_4 python=3.4
