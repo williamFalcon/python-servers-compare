@@ -1,7 +1,6 @@
 import unittest
 
-from hello import app
-
+from application import app
 
 class TestPost(unittest.TestCase):
     def test_post(self):
