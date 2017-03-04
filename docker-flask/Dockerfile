@@ -28,11 +28,14 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 # miniconda et al.
 # ------------------------
 # Install miniconda to /miniconda
-#RUN curl -LO http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-#RUN bash Miniconda-latest-Linux-x86_64.sh -p /miniconda -b
-#RUN rm Miniconda-latest-Linux-x86_64.sh
-#ENV PATH=/miniconda/bin:${PATH}
-#RUN conda update -y conda
+ENV MINICONDA_VERSION 3-4.2.12
+RUN echo "export PATH=/opt/conda/bin:$PATH" > /etc/profile.d/conda.sh \
+ && curl -fSL https://repo.continuum.io/miniconda/Miniconda${MINICONDA_VERSION}-Linux-x86_64.sh -o ~/miniconda.sh \
+ && /bin/bash ~/miniconda.sh -b -p /opt/conda \
+ && rm ~/miniconda.sh
+
+ENV PATH /opt/conda/bin:$PATH
+RUN conda create --name python3_4 python=3.4
 
 # ---------------------------
 # INSTALL FLASK AND APP DEPS
@@ -40,7 +43,9 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 # ---------------------------
 # install python deps
 COPY app/requirements.txt /var/www/app/requirements.txt
-RUN pip install -r /var/www/app/requirements.txt
+RUN /bin/bash -c ". activate python3_4 && pip install uwsgi"
+RUN /bin/bash -c ". activate python3_4 && pip install -r /var/www/app/requirements.txt"
+
 
 # ---------------------------
 # RUN APP
@@ -51,6 +56,7 @@ RUN pip install -r /var/www/app/requirements.txt
 COPY app /var/www/app
 RUN chown -R www-data:www-data /var/www/app
 RUN chown -R www-data:www-data /var/log
+
 
 # starts supervisor given the apps in the config file
 CMD ["/usr/bin/supervisord"]
